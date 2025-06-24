@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "db:init": "node app/db/init.js",
+    "db:seed": "node app/db/seeds/classes.js",
+    "postinit:db": "node app/db/seeds/classes.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,6 +18,7 @@
     "@mui/material": "^7.1.2",
     "axios": "^1.10.0",
     "next": "15.2.0",
+    "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
