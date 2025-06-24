@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnection from "@/lib/db/db-conection";
-// import { sql } from "@vercel/postgres";
 
 export const GET = async () => {
   try {

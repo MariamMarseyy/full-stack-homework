@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import {
   Box,
@@ -18,10 +19,10 @@ import {
   Typography,
   TableContainer,
 } from "@mui/material";
-import React from "react";
-import { useState } from "react";
-import { unsetSymbolHandler } from "../src/utils";
 import axios from "axios";
+import { useState } from "react";
+
+import { unsetSymbolHandler } from "../src/utils";
 
 type Grade = {
   id: number;
@@ -52,7 +53,7 @@ interface ClassItem {
 }
 
 const GradesPage = () => {
-  const [grades] = useState<Grade[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(false);
   const [grade, setGrade] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -96,10 +97,14 @@ const GradesPage = () => {
     try {
       const res = await axios.post("/api/grades", {
         grade: Number(grade),
-        classSelection: current?.id,
+        classId: current?.id,
       });
 
-      setGrade(res.data.grade);
+      setGrade(res.data.classSelection);
+
+      const getResult = await axios.get("/api/grades", {});
+
+      setGrades(getResult.data);
 
       setLoading(false);
 

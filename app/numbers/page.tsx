@@ -1,5 +1,7 @@
 "use client";
+
 import React, { useState } from "react";
+
 import {
   Table,
   Button,
@@ -10,10 +12,12 @@ import {
   TableBody,
   Container,
   Typography,
+  Skeleton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { unsetSymbolHandler } from "../src/utils";
 import axios from "axios";
+import { styled } from "@mui/material/styles";
+
+import { unsetSymbolHandler } from "../src/utils";
 
 const tableCellData = ["ID 1", "Number 1", "ID 2", "Number 2", "Sum"];
 
@@ -42,20 +46,18 @@ interface INumberPageProps {
 }
 
 const NumbersPage = () => {
+  const [loading, setLoading] = useState<boolean>(false);
   const [value, setValue] = useState<number | null>(null);
   const [pairs, setPairs] = useState<INumberPageProps[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchPairs = async () => {
     setLoading(true);
     try {
-      const response = await axios.get<INumberPageProps[]>(
+      const { data } = await axios.get<INumberPageProps[]>(
         "/api/numbers/pairs"
       );
-      setPairs(response.data);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+      setPairs(data);
+    } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
@@ -82,16 +84,17 @@ const NumbersPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const intValue = parseInt(String(value), 10);
-    if (isNaN(intValue)) return;
-    try {
-      await axios.post("/api/numbers", { value: intValue });
+    if (value == null) return;
 
+    setLoading(true);
+    try {
+      await axios.post<INumberPageProps>("/api/numbers", { value });
+      await fetchPairs();
       setValue(null);
-      fetchPairs();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,12 +116,12 @@ const NumbersPage = () => {
           onChange={onChangeHandler}
           onKeyDown={(e) => unsetSymbolHandler(e)}
         />
-        <Button variant="contained" type="submit">
+        <Button variant="contained" type="submit" loading={loading}>
           Add
         </Button>
       </form>
 
-      <Table>
+      <Table sx={{ tableLayout: "fixed", width: "100%" }}>
         <TableHead>
           <TableRow>
             {tableCellData.map((item) => (
@@ -130,7 +133,7 @@ const NumbersPage = () => {
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={5}>Loading...</TableCell>
+              <Skeleton variant="rectangular" width={210} height={118} />
             </TableRow>
           ) : pairs?.length > 0 ? (
             pairs?.map((pair) => (
@@ -144,7 +147,15 @@ const NumbersPage = () => {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5}>No data</TableCell>
+              <TableCell
+                colSpan={5}
+                sx={{
+                  width: "100%",
+                  textAlign: "center",
+                }}
+              >
+                No data
+              </TableCell>
             </TableRow>
           )}
         </TableBody>
